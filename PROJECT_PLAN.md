@@ -70,6 +70,21 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] git init + first commit (4506d3b)
 - [x] GitHub repo created + pushed: https://github.com/dmtob22/aroundmystay (private)
 - [~] Domain: deferred by choice — free Vercel URL instead (revisit at traction)
+
+## Phase 1 status
+
+- [x] Search UI built & verified (2026-06-10): city/hotel autocomplete fields
+  (Places API New via `src/lib/places.js`), date pickers with validation,
+  scan button gated until all fields valid. Runs clean with NO key — shows
+  "autocomplete is asleep" note; wakes automatically when
+  `VITE_GOOGLE_MAPS_API_KEY` exists in git-ignored `.env` (see `.env.example`).
+- [ ] Derek: Google Cloud account (trial mode = card cannot be charged)
+- [ ] Guardrails BEFORE first key use: per-API daily quota caps inside free
+  tier, key restricted to our URLs, billing alerts. Re-verify caps when the
+  90-day trial ends.
+- [ ] Enable Places API (New); create restricted key → `.env`
+- [ ] Live autocomplete verified end-to-end
+- [ ] Deploy to Vercel (free URL)
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
