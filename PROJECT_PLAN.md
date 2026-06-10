@@ -24,8 +24,10 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 ## Decisions made
 
 - **Name:** AroundMyStay. `aroundmystay.com` verified unregistered on
-  2026-06-10 (RDAP) and no existing app uses the name. Derek to register the
-  domain ASAP (~$10–15/yr) before someone else does.
+  2026-06-10 (RDAP) and no existing app uses the name. Domain purchase
+  DEFERRED (Derek's call, same as Practice Points) — app will live on the
+  free `*.vercel.app` URL; buy the domain only if the app gets traction.
+  Known risk: someone else could register it in the meantime.
 - **Website first** — no app stores for v1. PWA/installable later if earned.
 - **Stack:** Vite + React, Vercel hosting, GitHub. Supabase only in Phase 6
   (accounts/saved trips). Same playbook as Practice Points.
@@ -66,8 +68,8 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] Project folder + Vite/React skeleton created
 - [x] `npm install` + app runs locally (verified 2026-06-10, no console errors)
 - [x] git init + first commit (4506d3b)
-- [ ] GitHub repo created + pushed (Derek creates empty private repo on github.com)
-- [ ] Derek: register aroundmystay.com
+- [x] GitHub repo created + pushed: https://github.com/dmtob22/aroundmystay (private)
+- [~] Domain: deferred by choice — free Vercel URL instead (revisit at traction)
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
