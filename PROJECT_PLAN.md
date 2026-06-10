@@ -64,8 +64,9 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 
 - [x] Name chosen & vetted (2026-06-10)
 - [x] Project folder + Vite/React skeleton created
-- [ ] `npm install` + app runs locally
-- [ ] git init + first commit + GitHub repo
+- [x] `npm install` + app runs locally (verified 2026-06-10, no console errors)
+- [x] git init + first commit (4506d3b)
+- [ ] GitHub repo created + pushed (Derek creates empty private repo on github.com)
 - [ ] Derek: register aroundmystay.com
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
