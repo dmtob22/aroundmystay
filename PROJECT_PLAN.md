@@ -78,13 +78,21 @@ folder — only in git-ignored `.env` or Vercel environment variables.
   scan button gated until all fields valid. Runs clean with NO key — shows
   "autocomplete is asleep" note; wakes automatically when
   `VITE_GOOGLE_MAPS_API_KEY` exists in git-ignored `.env` (see `.env.example`).
-- [ ] Derek: Google Cloud account (trial mode = card cannot be charged)
-- [ ] Guardrails BEFORE first key use: per-API daily quota caps inside free
-  tier, key restricted to our URLs, billing alerts. Re-verify caps when the
-  90-day trial ends.
-- [ ] Enable Places API (New); create restricted key → `.env`
-- [ ] Live autocomplete verified end-to-end
-- [ ] Deploy to Vercel (free URL)
+- [x] Google Cloud account created (2026-06-10, trial mode: $300/90 days,
+  card cannot be charged while in trial)
+- [x] Places API (New) enabled (gotcha: the Maps onboarding wizard enabled 33
+  OTHER APIs but not this one — had to enable via the activation URL from the
+  403 SERVICE_DISABLED error)
+- [x] Key restricted: Websites = http://localhost:5174/* ; API = Places API
+  (New) only (initially saved as "33 APIs" — re-restricted). Key rotated after
+  it appeared in a chat screenshot; lives ONLY in git-ignored `.env`.
+- [x] Live autocomplete VERIFIED end-to-end (2026-06-10): city suggestions,
+  hotel suggestions biased to chosen city (placeLocation), dates, scan
+  confirmation. Tested: Nashville → Gaylord Opryland.
+- [ ] Quota caps + billing alert (NEXT — before regular use; re-verify when
+  trial ends)
+- [ ] Deploy to Vercel (free URL; then add Vercel URL to key's website
+  restrictions + env var in Vercel)
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
