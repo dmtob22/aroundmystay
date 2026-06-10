@@ -95,8 +95,30 @@ folder — only in git-ignored `.env` or Vercel environment variables.
   🔴 RULE: if the account is EVER upgraded to full/paid, set these BEFORE
   using the app again: Places API (New) → Requests per day = 300, Requests
   per minute = 100, plus a billing budget alert. Never upgrade casually.
-- [ ] Deploy to Vercel (free URL; then add Vercel URL to key's website
-  restrictions + env var in Vercel)
+- [x] Deployed to Vercel: https://aroundmystay.vercel.app (public; deployment
+  protection NOT an issue this time). Vercel URL added to key restrictions.
+- [x] PHASE 1 COMPLETE — verified working on Derek's phone (2026-06-10).
+  Debug saga for the record: live site said "API key not valid" because the
+  WHOLE `.env` line (name + = + key) had been pasted into Vercel's value box
+  (baked value was 64 chars instead of 39). Found via the on-screen error
+  display added in 52b2477 + inspecting the deployed bundle's exact bytes.
+  Fix: Vercel env var = key only, then Redeploy. LESSONS: (a) errors must be
+  visible on phones, (b) when a secret transits a human clipboard, verify the
+  DEPLOYED value's length/shape, not just that a key is present.
+- [ ] 🔴 Old exposed key ("Maps Platform API Key") confirmed STILL ALIVE —
+  Derek to delete in Keys & Credentials (keep only "New Maps Platform API
+  Key").
+
+## Phase 2 status (events via Ticketmaster Discovery API)
+
+- [ ] Derek: developer.ticketmaster.com account → Consumer Key (free, no card)
+- [ ] Key decision for v1: client-side via VITE_TICKETMASTER_KEY (acceptable:
+  no payment attached, default rate caps ~5/sec & 5000/day bound the damage;
+  move behind a Vercel serverless proxy before any serious launch)
+- [ ] Hotel coordinates: fetch placeLocation on hotel pick (city-only today)
+- [ ] Scan → events near hotel during stay dates, sorted by date: name, venue,
+  date/time, price range, image, Get Tickets link, "interested" checkboxes
+- [ ] Verified live on phone
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
