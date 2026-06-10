@@ -1,0 +1,19 @@
+# dependencies
+node_modules
+
+# build output
+dist
+
+# local env files — NEVER commit secrets
+.env
+.env.*
+
+# misc
+commit-msg.txt
+.DS_Store
+*.local
+
+# safety net: never commit anything that looks like keys/secrets
+*secret*.txt
+*keys*.txt
+Stripe*.txt
