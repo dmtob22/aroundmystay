@@ -118,6 +118,18 @@ const styles = {
     fontSize: 15,
     lineHeight: 1.55,
   },
+  errorNote: {
+    marginTop: 14,
+    padding: '12px 14px',
+    borderRadius: 10,
+    background: 'rgba(239,68,68,0.12)',
+    border: '1px solid rgba(248,113,113,0.4)',
+    color: '#fecaca',
+    fontSize: 13.5,
+    lineHeight: 1.5,
+    textAlign: 'left',
+    wordBreak: 'break-word',
+  },
 }
 
 function useDebounced(value, ms) {
@@ -206,6 +218,7 @@ export default function App() {
   const [checkin, setCheckin] = useState('')
   const [checkout, setCheckout] = useState('')
   const [summary, setSummary] = useState(null)
+  const [apiError, setApiError] = useState(null)
 
   const cityQuery = useDebounced(cityText, 300)
   const hotelQuery = useDebounced(hotelText, 300)
@@ -216,8 +229,10 @@ export default function App() {
       setCitySugs([])
       return
     }
-    autocompleteCities(cityQuery).then((r) => {
-      if (!stale) setCitySugs(r)
+    autocompleteCities(cityQuery).then(({ items, error }) => {
+      if (stale) return
+      setCitySugs(items)
+      setApiError(error)
     })
     return () => {
       stale = true
@@ -234,8 +249,10 @@ export default function App() {
       setHotelSugs([])
       return
     }
-    autocompleteHotels(hotelQuery, cityCenter).then((r) => {
-      if (!stale) setHotelSugs(r)
+    autocompleteHotels(hotelQuery, cityCenter).then(({ items, error }) => {
+      if (stale) return
+      setHotelSugs(items)
+      setApiError(error)
     })
     return () => {
       stale = true
@@ -351,6 +368,8 @@ export default function App() {
             wakes up automatically once it is.
           </div>
         )}
+
+        {apiError && <div style={styles.errorNote}>⚠️ {apiError}</div>}
 
         {summary && <div style={styles.summary}>{summary}</div>}
       </div>
