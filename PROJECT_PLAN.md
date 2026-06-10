@@ -89,8 +89,12 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] Live autocomplete VERIFIED end-to-end (2026-06-10): city suggestions,
   hotel suggestions biased to chosen city (placeLocation), dates, scan
   confirmation. Tested: Nashville → Gaylord Opryland.
-- [ ] Quota caps + billing alert (NEXT — before regular use; re-verify when
-  trial ends)
+- [~] Quota caps: NOT EDITABLE during free trial (Google blocks quota changes
+  on trial accounts — trial itself is the spending wall; even at trial end,
+  Google suspends rather than charges unless you manually upgrade).
+  🔴 RULE: if the account is EVER upgraded to full/paid, set these BEFORE
+  using the app again: Places API (New) → Requests per day = 300, Requests
+  per minute = 100, plus a billing budget alert. Never upgrade casually.
 - [ ] Deploy to Vercel (free URL; then add Vercel URL to key's website
   restrictions + env var in Vercel)
 - [ ] Derek: Google Cloud account (needed for Phase 1)
