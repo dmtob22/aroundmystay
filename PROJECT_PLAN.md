@@ -143,6 +143,10 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] Place cards: photo, ★ rating (count), $-level, Open now / Closed right
   now, address, ☆ Pick toggle, Details link to Google Maps.
 - [x] Verified locally (Nashville/Gaylord: 28 events + 15 per tab).
+- [x] Stay field accepts hotel name OR street address (Derek's insight:
+  Airbnbs/rentals/family). Dropped the 'lodging' type filter on the stay
+  autocomplete; city bias keeps suggestions local. Verified: "501 Broadway"
+  → scan centers there, distances recompute correctly.
 - [x] Distance from hotel on every event/place card (Derek's request):
   straight-line haversine miles ("≈0.5 mi"), computed free at scan time from
   coordinates we already have. Phase 5 upgrades to true walk/drive times.
