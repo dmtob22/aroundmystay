@@ -171,6 +171,20 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] Verified locally end-to-end (Nashville/Gaylord, 5 picks across
   events/food/outdoors; popup content checked).
 - [ ] Derek: verify live on phone (auto-deploys; no env/account changes)
+
+## Phase 5 status (smart details) — COMPLETE 2026-06-10
+
+- [x] Tap any event/place card → bottom detail sheet (src/App.jsx
+  DetailSheet): 🚶 walk + 🚗 drive times (Routes API, src/lib/routes.js),
+  🚕 Uber/Lyft estimate (OUR formula from drive time/distance — labeled
+  "est."; no public rideshare pricing APIs exist), opening hours + 2 review
+  snippets (Places details, on-demand per tap), Get tickets / Open in Maps.
+- [x] Graceful degradation: if Routes is unavailable, falls back to
+  straight-line distance chip + on-screen error.
+- [x] Routes API enabled in console; key now restricted to 2 APIs: Places
+  API (New) + Routes API. Verified live data (Gaylord→Ryman 21 min drive).
+- [ ] Derek: verify live on phone (already deployed; Routes enable is
+  project-wide so the live site gained it instantly)
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
