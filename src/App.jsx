@@ -206,7 +206,20 @@ const styles = {
     cursor: 'pointer',
     whiteSpace: 'nowrap',
   },
-  resultsTitleWrap: { textAlign: 'left', minWidth: 0 },
+  resultsTitleWrap: { textAlign: 'left', minWidth: 0, flex: 1 },
+  headerMapBtn: {
+    border: 'none',
+    background: 'linear-gradient(90deg, #14b8a6, #0d9488)',
+    color: 'white',
+    fontWeight: 700,
+    borderRadius: 10,
+    padding: '10px 14px',
+    fontSize: 14,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+    boxShadow: '0 2px 10px rgba(20,184,166,0.35)',
+  },
   resultsTitle: {
     fontSize: 17,
     fontWeight: 700,
@@ -649,6 +662,9 @@ export default function App() {
               {events.length} events
             </div>
           </div>
+          <button style={styles.headerMapBtn} onClick={() => setScreen('map')}>
+            🗺️ Map{picked.size > 0 ? ' (' + picked.size + ')' : ''}
+          </button>
         </div>
 
         <div style={styles.tabBar}>

@@ -131,8 +131,12 @@ export default function MapView({ center, homeName, items, onBack }) {
         <div style={styles.titleWrap}>
           <div style={styles.title}>🗺️ Around {homeName}</div>
           <div style={styles.sub}>
-            {items.length} pick{items.length === 1 ? '' : 's'} · tap a pin for
-            details
+            {items.length === 0
+              ? 'Star ☆ picks on the results list to add pins here'
+              : items.length +
+                ' pick' +
+                (items.length === 1 ? '' : 's') +
+                ' · tap a pin for details'}
           </div>
         </div>
       </div>
