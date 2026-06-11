@@ -8,6 +8,7 @@ import {
   photoUrl,
 } from './lib/places'
 import { hasTmKey, findEvents } from './lib/ticketmaster'
+import MapView from './MapView'
 
 // Each tab is one Places nearby-search. Radii differ on purpose: dinner
 // should be walkable-ish, a famous trailhead can be a short drive away.
@@ -305,13 +306,15 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    padding: '12px 16px',
-    background: 'rgba(15,23,42,0.92)',
-    borderTop: '1px solid rgba(255,255,255,0.12)',
+    padding: '14px 16px',
+    background: 'linear-gradient(90deg, #14b8a6, #0d9488)',
+    border: 'none',
+    borderTop: '1px solid rgba(255,255,255,0.2)',
     textAlign: 'center',
-    fontSize: 14,
-    color: '#ccfbf1',
-    backdropFilter: 'blur(8px)',
+    fontSize: 16,
+    fontWeight: 700,
+    color: 'white',
+    cursor: 'pointer',
   },
 }
 
@@ -574,6 +577,58 @@ export default function App() {
     })
   }
 
+  if (screen === 'map') {
+    const pickedItems = [
+      ...events
+        .filter((e) => picked.has(e.id))
+        .map((e) => ({
+          id: e.id,
+          name: e.name,
+          lat: e.lat,
+          lng: e.lng,
+          emoji: '🎟️',
+          meta: [
+            e.venue,
+            e.date ? formatDate(e.date) : '',
+            e.time ? formatTime(e.time) : '',
+            distanceLabel(e.miles),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          link: e.url,
+          linkLabel: 'Get tickets ↗',
+        })),
+      ...PLACE_TABS.flatMap((t) =>
+        (places[t.key] || [])
+          .filter((p) => picked.has(p.id))
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            lat: p.lat,
+            lng: p.lng,
+            emoji: t.emoji,
+            meta: [
+              p.rating != null ? '★ ' + p.rating : '',
+              distanceLabel(p.miles),
+              p.address,
+            ]
+              .filter(Boolean)
+              .join(' · '),
+            link: p.mapsUri,
+            linkLabel: 'Details ↗',
+          })),
+      ),
+    ]
+    return (
+      <MapView
+        center={hotelCenter || cityCenter}
+        homeName={hotel?.main || 'your stay'}
+        items={pickedItems}
+        onBack={() => setScreen('results')}
+      />
+    )
+  }
+
   if (screen === 'results') {
     const byDate = []
     for (const e of events) {
@@ -759,9 +814,9 @@ export default function App() {
         ))}
 
         {picked.size > 0 && (
-          <div style={styles.footerBar}>
-            ★ {picked.size} picked — the map view arrives in Phase 4
-          </div>
+          <button style={styles.footerBar} onClick={() => setScreen('map')}>
+            🗺️ View map ({picked.size} picked)
+          </button>
         )}
       </div>
     )
