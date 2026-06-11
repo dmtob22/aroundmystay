@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   hasKey,
   autocompleteCities,
-  autocompleteHotels,
+  autocompleteStays,
   placeLocation,
   searchPlaces,
   photoUrl,
@@ -493,7 +493,7 @@ export default function App() {
       setHotelSugs([])
       return
     }
-    autocompleteHotels(hotelQuery, cityCenter).then(({ items, error }) => {
+    autocompleteStays(hotelQuery, cityCenter).then(({ items, error }) => {
       if (stale) return
       setHotelSugs(items)
       setApiError(error)
@@ -792,8 +792,10 @@ export default function App() {
         />
 
         <AutocompleteField
-          label="Hotel"
-          placeholder={city ? 'Where are you staying?' : 'Pick a city first'}
+          label="Where you're staying"
+          placeholder={
+            city ? 'Hotel name or street address' : 'Pick a city first'
+          }
           value={hotelText}
           onText={(t) => {
             setHotelText(t)

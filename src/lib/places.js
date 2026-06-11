@@ -62,8 +62,10 @@ export function autocompleteCities(input) {
   return autocomplete(input, { types: ['locality'] })
 }
 
-export function autocompleteHotels(input, biasCenter) {
-  return autocomplete(input, { types: ['lodging'], biasCenter })
+// No type filter: matches hotels by name AND street addresses (Airbnbs,
+// rentals, a friend's house), biased toward the chosen city.
+export function autocompleteStays(input, biasCenter) {
+  return autocomplete(input, { biasCenter })
 }
 
 // Nearby search for a category of places. Returns { items, error }.
