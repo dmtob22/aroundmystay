@@ -111,13 +111,20 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 
 ## Phase 2 status (events via Ticketmaster Discovery API)
 
-- [ ] Derek: developer.ticketmaster.com account → Consumer Key (free, no card)
-- [ ] Key decision for v1: client-side via VITE_TICKETMASTER_KEY (acceptable:
+- [x] Derek: Ticketmaster Consumer Key in `.env` as VITE_TICKETMASTER_KEY
+  (free, no card). Old Google key deleted & verified dead same day.
+- [x] Key decision for v1: client-side via VITE_TICKETMASTER_KEY (acceptable:
   no payment attached, default rate caps ~5/sec & 5000/day bound the damage;
   move behind a Vercel serverless proxy before any serious launch)
-- [ ] Hotel coordinates: fetch placeLocation on hotel pick (city-only today)
-- [ ] Scan → events near hotel during stay dates, sorted by date: name, venue,
-  date/time, price range, image, Get Tickets link, "interested" checkboxes
+- [x] Hotel coordinates fetched on hotel pick (placeLocation); scan centers
+  on hotel, falls back to city center
+- [x] Results screen: events within 20 mi during stay, grouped by day —
+  image, venue, local time, price range, category chip, Get Tickets link,
+  ★ Pick toggles + picked-count footer (picks feed the Phase 4 map)
+- [x] Verified locally with REAL data (Nashville/Gaylord Jul 10–13: 28
+  events). Gotchas fixed: use localStartDateTime (UTC range leaked previous
+  evening's events); Ticketmaster segment "Undefined" → show "Event"
+- [ ] Vercel env var VITE_TICKETMASTER_KEY (VALUE ONLY) + redeploy
 - [ ] Verified live on phone
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
