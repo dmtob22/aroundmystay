@@ -21,8 +21,10 @@ export async function findEvents({ latitude, longitude, startDate, endDate }) {
     latlong: latitude + ',' + longitude,
     radius: '20',
     unit: 'miles',
-    startDateTime: startDate + 'T00:00:00Z',
-    endDateTime: endDate + 'T23:59:59Z',
+    // Local (venue) time, not UTC — otherwise the previous evening's events
+    // leak in from the timezone offset.
+    localStartDateTime:
+      startDate + 'T00:00:00,' + endDate + 'T23:59:59',
     sort: 'date,asc',
     size: '100',
   })
@@ -59,7 +61,11 @@ export async function findEvents({ latitude, longitude, startDate, endDate }) {
       date: e.dates?.start?.localDate || '',
       time: e.dates?.start?.localTime || '',
       venue: venue?.name || '',
-      category: e.classifications?.[0]?.segment?.name || 'Event',
+      category:
+        (e.classifications?.[0]?.segment?.name || '') !== '' &&
+        e.classifications[0].segment.name !== 'Undefined'
+          ? e.classifications[0].segment.name
+          : 'Event',
       priceMin: e.priceRanges?.[0]?.min,
       priceMax: e.priceRanges?.[0]?.max,
       image: img?.url || '',
