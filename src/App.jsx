@@ -121,7 +121,17 @@ const styles = {
   },
   optionSecondary: { display: 'block', fontSize: 12.5, color: '#94a3b8' },
   dateRow: { display: 'flex', gap: 10, marginBottom: 16 },
-  dateCol: { flex: 1 },
+  dateCol: { flex: 1, minWidth: 0 },
+  dateInput: {
+    // iOS Safari gives date inputs odd intrinsic sizing — flatten it.
+    WebkitAppearance: 'none',
+    appearance: 'none',
+    display: 'block',
+    width: '100%',
+    minHeight: 47,
+    boxSizing: 'border-box',
+    textAlign: 'left',
+  },
   button: {
     width: '100%',
     padding: '14px',
@@ -1147,7 +1157,7 @@ export default function App() {
             <label style={styles.fieldLabel}>Check-in</label>
             <input
               type="date"
-              style={styles.input}
+              style={{ ...styles.input, ...styles.dateInput }}
               value={checkin}
               onChange={(e) => setCheckin(e.target.value)}
             />
@@ -1156,7 +1166,7 @@ export default function App() {
             <label style={styles.fieldLabel}>Check-out</label>
             <input
               type="date"
-              style={styles.input}
+              style={{ ...styles.input, ...styles.dateInput }}
               value={checkout}
               min={checkin || undefined}
               onChange={(e) => setCheckout(e.target.value)}
