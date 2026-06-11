@@ -143,6 +143,9 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] Place cards: photo, ★ rating (count), $-level, Open now / Closed right
   now, address, ☆ Pick toggle, Details link to Google Maps.
 - [x] Verified locally (Nashville/Gaylord: 28 events + 15 per tab).
+- [x] Distance from hotel on every event/place card (Derek's request):
+  straight-line haversine miles ("≈0.5 mi"), computed free at scan time from
+  coordinates we already have. Phase 5 upgrades to true walk/drive times.
 - [ ] Derek: verify live on phone (auto-deployed; no Vercel env changes
   needed this phase)
 - DECISION: Facebook events = NOT possible (FB closed its public events API
