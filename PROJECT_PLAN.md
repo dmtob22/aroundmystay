@@ -165,6 +165,9 @@ folder — only in git-ignored `.env` or Vercel environment variables.
   category (🎟️🍽️🍸🥾🎡) for every ★ Pick; tap pin → popup with name,
   rating/venue, distance, and Get-tickets/Details link; auto-fits bounds.
 - [x] Results footer → "🗺️ View map (N picked)" button; ← Results to go back.
+- [x] Visibility fix (Derek's feedback): teal "🗺️ Map" button in the results
+  HEADER, always visible; map opens at 0 picks too (home pin + "star picks"
+  hint).
 - [x] Verified locally end-to-end (Nashville/Gaylord, 5 picks across
   events/food/outdoors; popup content checked).
 - [ ] Derek: verify live on phone (auto-deploys; no env/account changes)
