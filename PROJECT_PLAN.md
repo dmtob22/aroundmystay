@@ -132,6 +132,22 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - NOTE: Vercel bot protection ("Security Checkpoint") may serve a challenge
   page to automated curl checks of the live site — verify via a real browser
   or the Vercel dashboard instead of rapid polling.
+
+## Phase 3 status (places + filter tabs)
+
+- [x] Tabs on results screen: 🎟️ Events / 🍽️ Food / 🍸 Bars / 🥾 Outdoors /
+  🎡 Attractions — all fetched in parallel on scan. Uses the EXISTING Google
+  key (Places searchNearby + photo media), no new accounts.
+- [x] Outdoors tab per Derek's request: hiking_area, national_park, park
+  (40 km radius — trailheads can be a drive; food/bars 4 km, attractions 15).
+- [x] Place cards: photo, ★ rating (count), $-level, Open now / Closed right
+  now, address, ☆ Pick toggle, Details link to Google Maps.
+- [x] Verified locally (Nashville/Gaylord: 28 events + 15 per tab).
+- [ ] Derek: verify live on phone (auto-deployed; no Vercel env changes
+  needed this phase)
+- DECISION: Facebook events = NOT possible (FB closed its public events API
+  in 2018; scraping violates ToS). Gap noted; SeatGeek API is the Phase 7
+  candidate for a second event source.
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
