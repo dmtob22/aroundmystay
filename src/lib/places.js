@@ -137,6 +137,48 @@ export async function searchPlaces({ center, types, radius = 5000, max = 15 }) {
   }
 }
 
+// On-demand extras for the detail sheet: opening hours + review snippets.
+export async function placeDetails(placeId) {
+  if (!KEY) return { hours: [], reviews: [], website: '', error: null }
+  let res
+  try {
+    res = await fetch(
+      'https://places.googleapis.com/v1/places/' +
+        placeId +
+        '?fields=regularOpeningHours.weekdayDescriptions,reviews,websiteUri',
+      { headers: { 'X-Goog-Api-Key': KEY } },
+    )
+  } catch (e) {
+    return {
+      hours: [],
+      reviews: [],
+      website: '',
+      error: 'Network problem reaching Google: ' + e.message,
+    }
+  }
+  if (!res.ok) {
+    const text = await res.text()
+    console.error('Place details failed:', res.status, text)
+    return {
+      hours: [],
+      reviews: [],
+      website: '',
+      error: 'Google said no (' + res.status + ')',
+    }
+  }
+  const data = await res.json()
+  return {
+    hours: data.regularOpeningHours?.weekdayDescriptions || [],
+    reviews: (data.reviews || []).slice(0, 2).map((r) => ({
+      rating: r.rating,
+      text: r.text?.text || '',
+      author: r.authorAttribution?.displayName || 'A visitor',
+    })),
+    website: data.websiteUri || '',
+    error: null,
+  }
+}
+
 export function photoUrl(photoName, maxWidth = 300) {
   if (!photoName || !KEY) return ''
   return (

@@ -6,7 +6,9 @@ import {
   placeLocation,
   searchPlaces,
   photoUrl,
+  placeDetails,
 } from './lib/places'
+import { travelTimes, rideEstimate } from './lib/routes'
 import { hasTmKey, findEvents } from './lib/ticketmaster'
 import MapView from './MapView'
 
@@ -181,6 +183,100 @@ const styles = {
   },
   openNow: { color: '#5eead4', fontWeight: 600 },
   closedNow: { color: '#fca5a5', fontWeight: 600 },
+
+  // ----- detail sheet -----
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.55)',
+    zIndex: 2000,
+  },
+  sheet: {
+    position: 'fixed',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    maxHeight: '78vh',
+    overflowY: 'auto',
+    background: '#0f172a',
+    borderTop: '1px solid rgba(94,234,212,0.4)',
+    borderRadius: '18px 18px 0 0',
+    padding: '18px 20px 28px',
+    zIndex: 2001,
+    textAlign: 'left',
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    background: 'rgba(255,255,255,0.25)',
+    margin: '0 auto 14px',
+  },
+  sheetTitle: { fontSize: 19, fontWeight: 800, lineHeight: 1.3 },
+  sheetMeta: { fontSize: 14, color: '#cbd5e1', marginTop: 4, lineHeight: 1.5 },
+  travelRow: {
+    display: 'flex',
+    gap: 10,
+    marginTop: 16,
+    flexWrap: 'wrap',
+  },
+  travelChip: {
+    background: 'rgba(255,255,255,0.07)',
+    border: '1px solid rgba(255,255,255,0.14)',
+    borderRadius: 12,
+    padding: '10px 14px',
+    fontSize: 14,
+    color: '#e2e8f0',
+    lineHeight: 1.4,
+  },
+  sectionTitle: {
+    marginTop: 18,
+    marginBottom: 8,
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#5eead4',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+  },
+  hoursLine: { fontSize: 13.5, color: '#cbd5e1', lineHeight: 1.7 },
+  reviewBox: {
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    padding: '10px 14px',
+    marginBottom: 8,
+    fontSize: 13.5,
+    color: '#e2e8f0',
+    lineHeight: 1.55,
+  },
+  reviewAuthor: { color: '#94a3b8', fontSize: 12.5, marginTop: 4 },
+  sheetActions: { display: 'flex', gap: 10, marginTop: 18 },
+  sheetBtn: {
+    flex: 1,
+    textAlign: 'center',
+    padding: '13px',
+    borderRadius: 10,
+    border: 'none',
+    background: 'linear-gradient(90deg, #14b8a6, #0d9488)',
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 700,
+    textDecoration: 'none',
+    cursor: 'pointer',
+  },
+  sheetBtnGhost: {
+    flex: 1,
+    textAlign: 'center',
+    padding: '13px',
+    borderRadius: 10,
+    border: '1px solid rgba(255,255,255,0.25)',
+    background: 'transparent',
+    color: '#e2e8f0',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  loadingNote: { marginTop: 14, color: '#94a3b8', fontSize: 14 },
   resultsPage: {
     minHeight: '100vh',
     display: 'flex',
@@ -456,6 +552,145 @@ function priceDollars(priceLevel) {
   return map[priceLevel] || ''
 }
 
+// Bottom sheet with travel times, rideshare estimate, hours & reviews.
+// detail: {kind: 'event'|'place', item, emoji}
+function DetailSheet({ detail, center, onClose }) {
+  const { kind, item, emoji } = detail
+  const [info, setInfo] = useState(null) // {travel, extras}
+
+  useEffect(() => {
+    let stale = false
+    const jobs = [travelTimes(center, item)]
+    jobs.push(
+      kind === 'place' ? placeDetails(item.id) : Promise.resolve(null),
+    )
+    Promise.all(jobs).then(([travel, extras]) => {
+      if (!stale) setInfo({ travel, extras })
+    })
+    return () => {
+      stale = true
+    }
+  }, [kind, item, center])
+
+  const travel = info?.travel
+  const extras = info?.extras
+  const ride = travel?.drive ? rideEstimate(travel.drive) : null
+
+  return (
+    <>
+      <div style={styles.overlay} onClick={onClose} />
+      <div style={styles.sheet}>
+        <div style={styles.sheetHandle} />
+        <div style={styles.sheetTitle}>
+          {emoji} {item.name}
+        </div>
+        <div style={styles.sheetMeta}>
+          {kind === 'event'
+            ? [
+                item.venue,
+                item.date ? formatDateLong(item.date) : '',
+                item.time ? formatTime(item.time) : '',
+                priceLabel(item.priceMin, item.priceMax),
+              ]
+                .filter(Boolean)
+                .join(' · ')
+            : [
+                item.rating != null
+                  ? '★ ' + item.rating + ' (' + item.ratingCount.toLocaleString() + ')'
+                  : '',
+                priceDollars(item.priceLevel),
+                item.address,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+        </div>
+
+        {!info && <div style={styles.loadingNote}>Checking travel times…</div>}
+
+        {info && (
+          <div style={styles.travelRow}>
+            {travel?.walk && (
+              <div style={styles.travelChip}>
+                🚶 {travel.walk.minutes} min walk
+                <br />
+                <span style={{ color: '#94a3b8', fontSize: 12.5 }}>
+                  {travel.walk.miles.toFixed(1)} mi
+                </span>
+              </div>
+            )}
+            {travel?.drive && (
+              <div style={styles.travelChip}>
+                🚗 {travel.drive.minutes} min drive
+                <br />
+                <span style={{ color: '#94a3b8', fontSize: 12.5 }}>
+                  {travel.drive.miles.toFixed(1)} mi
+                </span>
+              </div>
+            )}
+            {ride && (
+              <div style={styles.travelChip}>
+                🚕 Uber/Lyft est.
+                <br />
+                <span style={{ color: '#94a3b8', fontSize: 12.5 }}>
+                  ~${ride.low}–${ride.high}
+                </span>
+              </div>
+            )}
+            {!travel?.walk && !travel?.drive && (
+              <div style={styles.travelChip}>
+                📏 {distanceLabel(item.miles)} straight-line
+                {travel?.error ? ' (live times unavailable)' : ''}
+              </div>
+            )}
+          </div>
+        )}
+
+        {travel?.error && (
+          <div style={styles.errorNote}>⚠️ {travel.error}</div>
+        )}
+
+        {extras?.hours?.length > 0 && (
+          <>
+            <div style={styles.sectionTitle}>Hours</div>
+            {extras.hours.map((h) => (
+              <div key={h} style={styles.hoursLine}>
+                {h}
+              </div>
+            ))}
+          </>
+        )}
+
+        {extras?.reviews?.length > 0 && (
+          <>
+            <div style={styles.sectionTitle}>What visitors say</div>
+            {extras.reviews.map((r, i) => (
+              <div key={i} style={styles.reviewBox}>
+                {'★'.repeat(Math.round(r.rating))} “
+                {r.text.length > 220 ? r.text.slice(0, 220) + '…' : r.text}”
+                <div style={styles.reviewAuthor}>— {r.author}</div>
+              </div>
+            ))}
+          </>
+        )}
+
+        <div style={styles.sheetActions}>
+          <a
+            style={styles.sheetBtn}
+            href={kind === 'event' ? item.url : item.mapsUri}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {kind === 'event' ? '🎟️ Get tickets' : '📍 Open in Maps'}
+          </a>
+          <button style={styles.sheetBtnGhost} onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default function App() {
   const keyReady = hasKey()
 
@@ -479,6 +714,7 @@ export default function App() {
   const [places, setPlaces] = useState({}) // {tabKey: [place, ...]}
   const [activeTab, setActiveTab] = useState('events')
   const [picked, setPicked] = useState(() => new Set())
+  const [detail, setDetail] = useState(null) // {kind, item, emoji}
 
   const cityQuery = useDebounced(cityText, 300)
   const hotelQuery = useDebounced(hotelText, 300)
@@ -708,7 +944,16 @@ export default function App() {
                 style={{
                   ...styles.eventCard,
                   ...(on ? styles.eventCardPicked : {}),
+                  cursor: 'pointer',
                 }}
+                onClick={() =>
+                  setDetail({
+                    kind: 'place',
+                    item: p,
+                    emoji:
+                      PLACE_TABS.find((t) => t.key === activeTab)?.emoji || '📍',
+                  })
+                }
               >
                 {p.photoName ? (
                   <img
@@ -754,7 +999,10 @@ export default function App() {
                       ...styles.pickBtn,
                       ...(on ? styles.pickBtnOn : {}),
                     }}
-                    onClick={() => togglePicked(p.id)}
+                    onClick={(ev) => {
+                      ev.stopPropagation()
+                      togglePicked(p.id)
+                    }}
                   >
                     {on ? '★ Picked' : '☆ Pick'}
                   </button>
@@ -763,8 +1011,9 @@ export default function App() {
                     href={p.mapsUri}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(ev) => ev.stopPropagation()}
                   >
-                    Details ↗
+                    Maps ↗
                   </a>
                 </div>
               </div>
@@ -783,7 +1032,11 @@ export default function App() {
                   style={{
                     ...styles.eventCard,
                     ...(on ? styles.eventCardPicked : {}),
+                    cursor: 'pointer',
                   }}
+                  onClick={() =>
+                    setDetail({ kind: 'event', item: e, emoji: '🎟️' })
+                  }
                 >
                   {e.image ? (
                     <img src={e.image} alt="" style={styles.eventImg} />
@@ -810,7 +1063,10 @@ export default function App() {
                         ...styles.pickBtn,
                         ...(on ? styles.pickBtnOn : {}),
                       }}
-                      onClick={() => togglePicked(e.id)}
+                      onClick={(ev) => {
+                        ev.stopPropagation()
+                        togglePicked(e.id)
+                      }}
                     >
                       {on ? '★ Picked' : '☆ Pick'}
                     </button>
@@ -819,6 +1075,7 @@ export default function App() {
                       href={e.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(ev) => ev.stopPropagation()}
                     >
                       Get tickets ↗
                     </a>
@@ -833,6 +1090,14 @@ export default function App() {
           <button style={styles.footerBar} onClick={() => setScreen('map')}>
             🗺️ View map ({picked.size} picked)
           </button>
+        )}
+
+        {detail && (
+          <DetailSheet
+            detail={detail}
+            center={hotelCenter || cityCenter}
+            onClose={() => setDetail(null)}
+          />
         )}
       </div>
     )
