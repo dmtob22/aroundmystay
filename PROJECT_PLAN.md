@@ -155,6 +155,19 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - DECISION: Facebook events = NOT possible (FB closed its public events API
   in 2018; scraping violates ToS). Gap noted; SeatGeek API is the Phase 7
   candidate for a second event source.
+
+## Phase 4 status (the map)
+
+- [x] DECISION: Leaflet + OpenStreetMap tiles instead of Google Maps JS —
+  free, no key, no console steps, and the Google key stays restricted to
+  Places API (New) only. Swap to Google tiles later if ever desired.
+- [x] src/MapView.jsx: full-screen map; teal 🏠 home pin; emoji pins per
+  category (🎟️🍽️🍸🥾🎡) for every ★ Pick; tap pin → popup with name,
+  rating/venue, distance, and Get-tickets/Details link; auto-fits bounds.
+- [x] Results footer → "🗺️ View map (N picked)" button; ← Results to go back.
+- [x] Verified locally end-to-end (Nashville/Gaylord, 5 picks across
+  events/food/outdoors; popup content checked).
+- [ ] Derek: verify live on phone (auto-deploys; no env/account changes)
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
