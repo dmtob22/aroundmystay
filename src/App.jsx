@@ -4,8 +4,37 @@ import {
   autocompleteCities,
   autocompleteHotels,
   placeLocation,
+  searchPlaces,
+  photoUrl,
 } from './lib/places'
 import { hasTmKey, findEvents } from './lib/ticketmaster'
+
+// Each tab is one Places nearby-search. Radii differ on purpose: dinner
+// should be walkable-ish, a famous trailhead can be a short drive away.
+const PLACE_TABS = [
+  { key: 'food', label: 'Food', emoji: '🍽️', types: ['restaurant'], radius: 4000 },
+  {
+    key: 'bars',
+    label: 'Bars',
+    emoji: '🍸',
+    types: ['bar', 'night_club'],
+    radius: 4000,
+  },
+  {
+    key: 'outdoors',
+    label: 'Outdoors',
+    emoji: '🥾',
+    types: ['hiking_area', 'national_park', 'park'],
+    radius: 40000,
+  },
+  {
+    key: 'attractions',
+    label: 'Attractions',
+    emoji: '🎡',
+    types: ['tourist_attraction', 'museum', 'amusement_park', 'zoo', 'aquarium'],
+    radius: 15000,
+  },
+]
 
 const styles = {
   page: {
@@ -123,6 +152,34 @@ const styles = {
   },
 
   // ----- results screen -----
+  tabBar: {
+    width: '100%',
+    maxWidth: 560,
+    display: 'flex',
+    gap: 8,
+    overflowX: 'auto',
+    padding: '10px 0 4px',
+    WebkitOverflowScrolling: 'touch',
+  },
+  tab: {
+    border: '1px solid rgba(255,255,255,0.2)',
+    background: 'rgba(255,255,255,0.05)',
+    color: '#cbd5e1',
+    borderRadius: 999,
+    padding: '8px 14px',
+    fontSize: 14,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
+  tabOn: {
+    border: '1px solid rgba(94,234,212,0.7)',
+    background: 'rgba(20,184,166,0.2)',
+    color: '#ccfbf1',
+    fontWeight: 700,
+  },
+  openNow: { color: '#5eead4', fontWeight: 600 },
+  closedNow: { color: '#fca5a5', fontWeight: 600 },
   resultsPage: {
     minHeight: '100vh',
     display: 'flex',
@@ -353,6 +410,16 @@ function priceLabel(min, max) {
   return '$' + Math.round(min)
 }
 
+function priceDollars(priceLevel) {
+  const map = {
+    PRICE_LEVEL_INEXPENSIVE: '$',
+    PRICE_LEVEL_MODERATE: '$$',
+    PRICE_LEVEL_EXPENSIVE: '$$$',
+    PRICE_LEVEL_VERY_EXPENSIVE: '$$$$',
+  }
+  return map[priceLevel] || ''
+}
+
 export default function App() {
   const keyReady = hasKey()
 
@@ -373,6 +440,8 @@ export default function App() {
   const [screen, setScreen] = useState('search') // 'search' | 'results'
   const [scanning, setScanning] = useState(false)
   const [events, setEvents] = useState([])
+  const [places, setPlaces] = useState({}) // {tabKey: [place, ...]}
+  const [activeTab, setActiveTab] = useState('events')
   const [picked, setPicked] = useState(() => new Set())
 
   const cityQuery = useDebounced(cityText, 300)
@@ -443,19 +512,34 @@ export default function App() {
     // Prefer the hotel's exact spot; fall back to city center if its lookup
     // hasn't finished (or failed).
     const center = hotelCenter || cityCenter
-    const { events: found, error } = await findEvents({
-      latitude: center.latitude,
-      longitude: center.longitude,
-      startDate: checkin,
-      endDate: checkout,
-    })
+    // Everything in parallel: one Ticketmaster query + one Places query per tab.
+    const [eventsRes, ...placeResults] = await Promise.all([
+      findEvents({
+        latitude: center.latitude,
+        longitude: center.longitude,
+        startDate: checkin,
+        endDate: checkout,
+      }),
+      ...PLACE_TABS.map((t) =>
+        searchPlaces({ center, types: t.types, radius: t.radius }),
+      ),
+    ])
     setScanning(false)
-    if (error) {
-      setApiError(error)
+    const firstError =
+      eventsRes.error || placeResults.find((r) => r.error)?.error
+    if (firstError && !placeResults.some((r) => r.items.length)) {
+      // Total failure — stay on the search screen and show why.
+      setApiError(firstError)
       return
     }
-    setEvents(found)
+    setEvents(eventsRes.events || [])
+    const byTab = {}
+    PLACE_TABS.forEach((t, i) => {
+      byTab[t.key] = placeResults[i].items
+    })
+    setPlaces(byTab)
     setPicked(new Set())
+    setActiveTab('events')
     setScreen('results')
   }
 
@@ -490,15 +574,107 @@ export default function App() {
           </div>
         </div>
 
-        {events.length === 0 && (
+        <div style={styles.tabBar}>
+          <button
+            style={{
+              ...styles.tab,
+              ...(activeTab === 'events' ? styles.tabOn : {}),
+            }}
+            onClick={() => setActiveTab('events')}
+          >
+            🎟️ Events ({events.length})
+          </button>
+          {PLACE_TABS.map((t) => (
+            <button
+              key={t.key}
+              style={{
+                ...styles.tab,
+                ...(activeTab === t.key ? styles.tabOn : {}),
+              }}
+              onClick={() => setActiveTab(t.key)}
+            >
+              {t.emoji} {t.label} ({(places[t.key] || []).length})
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'events' && events.length === 0 && (
           <div style={styles.emptyNote}>
             No ticketed events found within ~20 miles of your hotel for those
-            dates. Restaurants, bars, and tours arrive in Phase 3 — they don't
-            take nights off.
+            dates — check the other tabs; restaurants and trails don't take
+            nights off.
           </div>
         )}
 
-        {byDate.map((g) => (
+        {activeTab !== 'events' &&
+          (places[activeTab] || []).map((p) => {
+            const on = picked.has(p.id)
+            return (
+              <div
+                key={p.id}
+                style={{
+                  ...styles.eventCard,
+                  ...(on ? styles.eventCardPicked : {}),
+                }}
+              >
+                {p.photoName ? (
+                  <img
+                    src={photoUrl(p.photoName)}
+                    alt=""
+                    style={styles.eventImg}
+                  />
+                ) : (
+                  <div style={styles.eventImg} />
+                )}
+                <div style={styles.eventInfo}>
+                  <div style={styles.eventName}>{p.name}</div>
+                  <div style={styles.eventMeta}>
+                    {p.rating != null && (
+                      <>
+                        ★ {p.rating} ({p.ratingCount.toLocaleString()})
+                      </>
+                    )}
+                    {priceDollars(p.priceLevel)
+                      ? ' · ' + priceDollars(p.priceLevel)
+                      : ''}
+                    {p.openNow != null && (
+                      <>
+                        {' · '}
+                        <span
+                          style={p.openNow ? styles.openNow : styles.closedNow}
+                        >
+                          {p.openNow ? 'Open now' : 'Closed right now'}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div style={styles.eventMeta}>{p.address}</div>
+                </div>
+                <div style={styles.eventActions}>
+                  <button
+                    style={{
+                      ...styles.pickBtn,
+                      ...(on ? styles.pickBtnOn : {}),
+                    }}
+                    onClick={() => togglePicked(p.id)}
+                  >
+                    {on ? '★ Picked' : '☆ Pick'}
+                  </button>
+                  <a
+                    style={styles.ticketLink}
+                    href={p.mapsUri}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Details ↗
+                  </a>
+                </div>
+              </div>
+            )
+          })}
+
+        {activeTab === 'events' &&
+          byDate.map((g) => (
           <div key={g.date} style={{ width: '100%', maxWidth: 560 }}>
             <div style={styles.dateHeader}>{formatDateLong(g.date)}</div>
             {g.items.map((e) => {
