@@ -124,8 +124,14 @@ folder — only in git-ignored `.env` or Vercel environment variables.
 - [x] Verified locally with REAL data (Nashville/Gaylord Jul 10–13: 28
   events). Gotchas fixed: use localStartDateTime (UTC range leaked previous
   evening's events); Ticketmaster segment "Undefined" → show "Event"
-- [ ] Vercel env var VITE_TICKETMASTER_KEY (VALUE ONLY) + redeploy
-- [ ] Verified live on phone
+- [x] Vercel env var VITE_TICKETMASTER_KEY added. GOTCHA: "Redeploy" reused
+  the build cache (6s build) so the new env var didn't bake in — fix was
+  pushing a commit to force a fresh build. Rule: after env-var changes,
+  either uncheck "use existing build cache" on Redeploy or push a commit.
+- [x] PHASE 2 COMPLETE — verified live on Derek's phone (2026-06-10).
+- NOTE: Vercel bot protection ("Security Checkpoint") may serve a challenge
+  page to automated curl checks of the live site — verify via a real browser
+  or the Vercel dashboard instead of rapid polling.
 - [ ] Derek: Google Cloud account (needed for Phase 1)
 - [ ] Derek: Ticketmaster developer account (needed for Phase 2)
 - [ ] Derek: Yelp Fusion account (needed for Phase 3)
