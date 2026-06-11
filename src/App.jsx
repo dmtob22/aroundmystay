@@ -410,6 +410,26 @@ function priceLabel(min, max) {
   return '$' + Math.round(min)
 }
 
+// Straight-line ("as the crow flies") miles between two points. Real
+// walk/drive times come in Phase 5 — this is the free preview.
+function milesBetween(a, b) {
+  if (!a || !b || a.latitude == null || b.lat == null) return null
+  const R = 3958.8
+  const toRad = (d) => (d * Math.PI) / 180
+  const dLat = toRad(b.lat - a.latitude)
+  const dLng = toRad(b.lng - a.longitude)
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(s))
+}
+
+function distanceLabel(mi) {
+  if (mi == null) return ''
+  if (mi < 10) return '≈' + mi.toFixed(1) + ' mi'
+  return '≈' + Math.round(mi) + ' mi'
+}
+
 function priceDollars(priceLevel) {
   const map = {
     PRICE_LEVEL_INEXPENSIVE: '$',
@@ -532,10 +552,12 @@ export default function App() {
       setApiError(firstError)
       return
     }
-    setEvents(eventsRes.events || [])
+    // Tag everything with its distance from the hotel before storing.
+    const withMiles = (item) => ({ ...item, miles: milesBetween(center, item) })
+    setEvents((eventsRes.events || []).map(withMiles))
     const byTab = {}
     PLACE_TABS.forEach((t, i) => {
-      byTab[t.key] = placeResults[i].items
+      byTab[t.key] = placeResults[i].items.map(withMiles)
     })
     setPlaces(byTab)
     setPicked(new Set())
@@ -648,7 +670,12 @@ export default function App() {
                       </>
                     )}
                   </div>
-                  <div style={styles.eventMeta}>{p.address}</div>
+                  <div style={styles.eventMeta}>
+                    {distanceLabel(p.miles)
+                      ? distanceLabel(p.miles) + ' · '
+                      : ''}
+                    {p.address}
+                  </div>
                 </div>
                 <div style={styles.eventActions}>
                   <button
@@ -699,6 +726,9 @@ export default function App() {
                       {e.time ? ' · ' + formatTime(e.time) : ''}
                       {priceLabel(e.priceMin, e.priceMax)
                         ? ' · ' + priceLabel(e.priceMin, e.priceMax)
+                        : ''}
+                      {distanceLabel(e.miles)
+                        ? ' · ' + distanceLabel(e.miles)
                         : ''}
                     </div>
                     <span style={styles.chip}>{e.category}</span>
